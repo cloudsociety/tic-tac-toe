@@ -51,18 +51,11 @@ export default {
     aiPicks: function() {
       const gameStep = GameStep( this.board, this.symbols, this.difficulty );
 
-      // these ones needed for when AI plays first.
-      const fullBoard = /(X|O){9}/.test(gameStep.board.join(''));
-      const emptyBoard = /\d{9}/.test(gameStep.board.join(''));
-
-      if (gameStep.winner !== null) {
+      if (gameStep.winner !== null && gameStep.winner !== 'draw' ) {
         this.winner = gameStep.winner === 'aiPlayer' ? 'Computer wins!' : 'You win!';
         this.updateBoard(gameStep.board); // keep updating this.board so we can display game thumbnail.
         this.endGame();
-      } else if (emptyBoard) { // we don't need to update this.board if human plays first to a draw
-        this.winner = 'It was a draw';
-        this.endGame();
-      } else if (fullBoard) {
+      } else if (gameStep.winner === 'draw') {
         this.winner = 'It was a draw';
         this.updateBoard(gameStep.board);
         this.endGame();

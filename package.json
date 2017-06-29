@@ -9,7 +9,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
-    "tic-tac-toe-minimax": "^1.0.5",
+    "tic-tac-toe-minimax": "^1.0.7",
     "vue": "^2.3.3"
   },
   "devDependencies": {
