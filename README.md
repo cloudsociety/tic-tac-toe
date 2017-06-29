@@ -1,6 +1,11 @@
-# fcc-tic-tac-toe
+# fCC Tic Tac Toe
 
 > A freeCodeCamp Front-end Developer Challenge
+
+The object was to build a working Tic Tac Toe game that was unbeatable. I opted to use VueJS for my framework and happened upon [Mariano Heller's](https://github.com/marianoheller/tic-tac-toe-minimax) excellent minimax plugin (reading through theoretical articles on game theory was fun but time consuming).
+
+I spent a few minutes making some custom "nots" and "crosses" on my iPad, rolled them into a symbol, and added them.
+
 
 ## Build Setup
 
