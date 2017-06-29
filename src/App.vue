@@ -1,12 +1,14 @@
 <template>
   <div id="app">
-    <button @click="currentPlayer = currentPlayer === 'human' ? 'computer' : 'human'">switch to other</button>
+    <svg @click="setPlayerType('X')"><use xlink:href="#X"/></svg>
+    <svg @click="setPlayerType('O')"><use xlink:href="#O"/></svg>
     <h1 v-if="winner">{{winner}}</h1>
     <div class="game-grid">
       <button v-for="(square,index) in board"
               @click="huPicks(index)"
               :disabled="square !== index"
-              :key="square+index">{{square === index ? '' : square}}</button>
+              :key="square+index"
+              v-html="notOrCross(square, index)"></button>
     </div>
   </div>
 </template>
@@ -18,8 +20,6 @@ const { GameStep } = Minimax;
 export default {
   data () {
     return {
-      // huPlayer: "X",
-      // aiPlayer: "O",
       winner: null,
       currentPlayer: 'human',
       symbols: {
@@ -34,33 +34,57 @@ export default {
   },
   methods: {
     huPicks: function(index){
-      this.board.splice(index, 1, 'X');
+      this.board.splice(index, 1, this.symbols.huPlayer);
       this.currentPlayer = 'computer';
     },
     aiPicks: function() {
       const gameStep = GameStep( this.board, this.symbols, this.difficulty );
-      console.log(GameStep( ["O", "O", "X", "X", "X", "O", "O", "X", "O"], this.symbols, this.difficulty ));
-      if (gameStep.board.includes(this.symbols.huPlayer) || gameStep.board.includes(this.symbols.aiPlayer) && gameStep.winner === null) {
-        console.log('all good',gameStep);
+
+      // these ones needed for when AI plays first.
+      const fullBoard = /(X|O){9}/.test(gameStep.board.join(''));
+      const emptyBoard = /\d{9}/.test(gameStep.board.join(''));
+
+      if (gameStep.winner !== null) {
+        console.log('yes');
         this.winner = gameStep.winner;
+        this.resetBoard();
+      } else if (fullBoard || emptyBoard) {
+        this.winner = 'draw';
+        this.resetBoard();
+      } else {
+        this.winner = gameStep.winner;
+        console.log('all good',gameStep);
         this.board = this.board.map((item,index) => {
           return gameStep.board[index];
         });
-      } else if (gameStep.board.includes(this.symbols.huPlayer) || gameStep.board.includes(this.symbols.aiPlayer) && gameStep.winner !== null){
-        this.winner = gameStep.winner;
-        this.board = this.board.map((item,index) => {
-          return index;
-        });
-        console.log('Winner',this.board);
-      } else {
-        console.log('draw',gameStep);
-        this.winner = 'draw';
-        this.board = this.board.map((item,index) => {
-          return index;
-        });
       }
       this.currentPlayer = 'human';
+    },
+    resetBoard: function() {
+      this.board = this.board.map((item,index) => {
+        return index;
+      });
+    },
+    setPlayerType(type){
+      if(type === 'X'){
+        this.symbols = {
+          huPlayer: 'X',
+          aiPlayer: 'O'
+        }
+      } else {
+        this.symbols = {
+          huPlayer: 'O',
+          aiPlayer: 'X'
+        }
+        this.currentPlayer = 'computer';
+      }
+    },
+    notOrCross: function(text, index){ // why u no comuted?
+      return text === index ? '' : '<svg><use xlink:href="#'+text+'"/></svg>'
     }
+  },
+  computed: {
+
   },
   watch: {
     currentPlayer(value){
@@ -92,5 +116,9 @@ export default {
 
 button {
   width: 45px; height: 45px;
+
+  svg {
+    width: 30px; height: 30px;
+  }
 }
 </style>
