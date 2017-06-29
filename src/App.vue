@@ -1,9 +1,19 @@
 <template>
   <div id="app">
-    <svg @click="setPlayerType('X')"><use xlink:href="#X"/></svg>
-    <svg @click="setPlayerType('O')"><use xlink:href="#O"/></svg>
-    <h1 v-if="winner">{{winner}}</h1>
-    <div class="game-grid">
+    <div class="modal" v-show="displayModal">
+      <h1 v-if="winner">{{winner}}</h1>
+      <div class="win-display" v-if="winner">
+        <div class="grid-piece"
+             v-for="(square,index) in board"
+             :key="square+index"
+              v-html="notOrCross(square, index)"></div>
+      </div>
+      <h2>{{winner ? 'Play again?' : "Play as:"}}</h2>
+      <svg @click="setPlayerType('X')"><use xlink:href="#X"/></svg>
+      <svg @click="setPlayerType('O')"><use xlink:href="#O"/></svg>
+    </div>
+
+    <div class="game-grid" v-show="!displayModal">
       <button v-for="(square,index) in board"
               @click="huPicks(index)"
               :disabled="square !== index"
@@ -20,6 +30,7 @@ const { GameStep } = Minimax;
 export default {
   data () {
     return {
+      displayModal: true,
       winner: null,
       currentPlayer: 'human',
       symbols: {
@@ -45,27 +56,34 @@ export default {
       const emptyBoard = /\d{9}/.test(gameStep.board.join(''));
 
       if (gameStep.winner !== null) {
-        console.log('yes');
-        this.winner = gameStep.winner;
-        this.resetBoard();
-      } else if (fullBoard || emptyBoard) {
-        this.winner = 'draw';
-        this.resetBoard();
+        this.winner = gameStep.winner === 'aiPlayer' ? 'Computer wins!' : 'You win!';
+        this.updateBoard(gameStep.board); // keep updating this.board so we can display game thumbnail.
+        this.endGame();
+      } else if (emptyBoard) { // we don't need to update this.board if human plays first to a draw
+        this.winner = 'It was a draw';
+        this.endGame();
+      } else if (fullBoard) {
+        this.winner = 'It was a draw';
+        this.updateBoard(gameStep.board);
+        this.endGame();
       } else {
-        this.winner = gameStep.winner;
-        console.log('all good',gameStep);
-        this.board = this.board.map((item,index) => {
-          return gameStep.board[index];
-        });
+        this.winner = null;
+        this.updateBoard(gameStep.board);
       }
       this.currentPlayer = 'human';
     },
-    resetBoard: function() {
+    endGame: function() {
+      this.displayModal = true;
+    },
+    updateBoard: function(newArr) {
       this.board = this.board.map((item,index) => {
-        return index;
+        return newArr[index];
       });
     },
     setPlayerType(type){
+      this.board = this.board.map((item,index) => {
+        return index;
+      });
       if(type === 'X'){
         this.symbols = {
           huPlayer: 'X',
@@ -78,13 +96,11 @@ export default {
         }
         this.currentPlayer = 'computer';
       }
+      this.displayModal = false;
     },
     notOrCross: function(text, index){ // why u no comuted?
       return text === index ? '' : '<svg><use xlink:href="#'+text+'"/></svg>'
     }
-  },
-  computed: {
-
   },
   watch: {
     currentPlayer(value){
@@ -106,19 +122,37 @@ export default {
   margin-top: 60px;
 }
 
-.game-grid{
+.win-display{
   margin: 0 auto;
   width: 150px;
+
+  display: flex;
+  flex-flow:row wrap;
+
+  .grid-piece {
+    width: 45px; height: 45px;
+    border: 1px solid #ddd;
+
+    svg {
+      width: 30px; height: 30px;
+      margin-top: 7px;
+    }
+  }
+}
+
+.game-grid{
+  margin: 0 auto;
+  width: 300px;
 
   display: flex;
   flex-flow:row wrap;
 }
 
 button {
-  width: 45px; height: 45px;
+  width: 95px; height: 95px;
 
   svg {
-    width: 30px; height: 30px;
+    width: 80px; height: 80px;
   }
 }
 </style>
